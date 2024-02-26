@@ -85,6 +85,7 @@ def init_adxl345(cs_pin):
 # Function to read acceleration data
 def read_acceleration(cs_pin):
     data = read_register(cs_pin, REG_DATA_START, 6)
+    # Interpret the data as signed 16-bit values
     x =  (data[1] << 8) | data[0]
     if x & (1 << 15):  # Check if x is negative
         x -= (1 << 16)
@@ -92,10 +93,8 @@ def read_acceleration(cs_pin):
     if y & (1 << 15):  # Check if y is negative
         y -= (1 << 16)
     z =  (data[5] << 8) | data[4]
-    if z & (1 << 15):  # Check if z is negative
+    if z & (1 << 15):  # Check if y is negative
         z -= (1 << 16)
-    # print raw
-    # print(f"ADXL345: x={x}, y={y}, z={z}", flush=True)
     x = x * ACC_CONVERSION
     y = y * ACC_CONVERSION
     z = z * ACC_CONVERSION
@@ -121,14 +120,7 @@ try:
             if time.time() - last_time > 1:
                 print(f"ADXL345 #{i+1}: x={x}, y={y}, z={z}", flush=True)
                 last_time = time.time()
-            # x = x * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
-            # y = y * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
-            # z = z * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
-            # Converting to g-Forces
-            # To convert the 10-bit value to g-forces, 
-            # you need to know the scale factor, which depends on the selected g-range. 
-            # For a ±4g range, each bit represents 4g / 2^10 (about 0.0039g per bit):
-        #time.sleep(0.2)
+            #time.sleep(0.2)
 except KeyboardInterrupt:
     print("Program stopped")
 finally:
