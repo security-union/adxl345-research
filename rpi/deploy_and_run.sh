@@ -9,14 +9,23 @@ MAIN_PY_SCRIPT="activate_env_and_run.sh" # Python script to run
 
 # Add help message
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-    echo "Usage: $0 [install]"
+    echo "Usage: $0 --program <python-program-to-run> [--install]"
     echo "Syncs code to Raspberry Pi, installs dependencies, and runs program."
     echo "Optional argument 'install' installs dependencies."
     exit 0
 fi
 
+# Add argument to determine --program <program> to run, it is mandatory
+if [ "$1" == "--program" ]; then
+    MAIN_PY_SCRIPT="${MAIN_PY_SCRIPT} $2"
+else 
+    echo "Usage: $0 --program <python-program-to-run> [--install]"
+    echo "Error: No program specified."
+    exit 1
+fi
+
 # Add argument to optionally install dependencies
-if [ "$1" == "install" ]; then
+if [ "$2" == "--install" ]; then
     INSTALL_DEPENDENCIES=true
 else
     INSTALL_DEPENDENCIES=false

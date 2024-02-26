@@ -1,3 +1,15 @@
+
+## Serial
+
+Connect the serial to raspberry pi following this diagram:
+![alt text](Serial.png)
+
+Run the following command to install the serial tools and start:
+```
+deploy_and_run.sh --program serial.py  --install 
+```
+
+
 ## I2C
 
 Connect i2c to raspberry pi following this diagram:
@@ -10,7 +22,7 @@ Wire the SCL pin of the Accelerometer to Physical Pin 5 (SCL) on the Raspberry P
 
 run the following command to install the i2c tools:
 ```
-deploy_and_run.sh install
+deploy_and_run.sh install --program i2c.py --install 
 ```
 
 make sure to change the ip address in the deploy_and_run.sh file to the ip address of the raspberry pi.
@@ -32,4 +44,3 @@ output:
 70: -- -- -- -- -- -- -- --   
 ```
 
-## Serial
