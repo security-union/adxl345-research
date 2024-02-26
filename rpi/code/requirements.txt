@@ -3,3 +3,4 @@ spidev
 RPi.GPIO
 rpi.gpio
 smbus
+gpiozero

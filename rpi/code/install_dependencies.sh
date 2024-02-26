@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./create_gpio_access.sh
+
 # Update package list and upgrade all your packages
 sudo apt-get update
 

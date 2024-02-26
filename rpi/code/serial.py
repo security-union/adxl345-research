@@ -1,6 +1,7 @@
 import spidev
-import RPi.GPIO as GPIO
+from gpiozero import OutputDevice
 import time
+from struct import unpack
 
 
 ADXL345_MG2G_MULTIPLIER= 0.004 # < 4mg per lsb
@@ -12,14 +13,12 @@ spi.open(0, 0)  # Using SPI bus 0, device 0 (device is ignored but necessary for
 spi.max_speed_hz = 5000000  # 5 MHz
 spi.mode = 3  # ADXL345 operates in mode 3
 spi.bits_per_word = 8  # 8 bits per word
-spi.no_cs = True  # We will use our own CS pins
 
 
 # Setup GPIO for CS pins
-cs_pins = [17]  # GPIO pins for CS of each ADXL345
-GPIO.setmode(GPIO.BCM)
-for pin in cs_pins:
-    GPIO.setup(pin, GPIO.OUT, initial=GPIO.HIGH)
+cs_pins = [OutputDevice(pin) for pin in [17]]  # GPIO pins for CS of each ADXL345
+for cs_pin in cs_pins:
+    cs_pin.on()  # Set CS pin high to start (inactive)
 
 # ADXL345 Registers
 REG_DATA_FORMAT = 0x31
@@ -29,19 +28,20 @@ REG_DATA_START = 0x32
 
 # Write to register
 def write_register(cs_pin, reg_address, data):
-    GPIO.output(cs_pin, GPIO.LOW)
+    cs_pin.off()  # Set CS pin low to enable communication
     spi.xfer2([reg_address, data])
-    GPIO.output(cs_pin, GPIO.HIGH)
+    cs_pin.on()  # Set CS pin high to disable communication
+
 
 # Read from register
 # We read 6 bytes of data from the register
 def read_register(cs_pin, reg_address, length = 6):
     # Set the cs_pin to low to allow communication with the device
-    GPIO.output(cs_pin, GPIO.LOW)
+    cs_pin.off()  # Set CS pin low to enable communication
     spi.xfer2([reg_address | 0x80])  # Read operation, MSB = 1
     data = spi.xfer2([0x00] * length)  # Dummy write to read data
     # Set the cs_pin to high to disable communication with the device
-    GPIO.output(cs_pin, GPIO.HIGH)
+    cs_pin.on()  # Set CS pin high to disable communication
     return data
 
 # Initialize ADXL345
@@ -50,19 +50,12 @@ def init_adxl345(cs_pin):
     # The DATA_FORMAT register controls the presentation of data to
     # Register 0x32 through Register 0x37. All data, except that for the
     # ±16 g range, must be clipped to avoid rollover.
-
     # SELF_TEST bit is set to 0, so no self-test
     # SPI bit is set to 0, so 4-wire SPI mode
     # INT_INVERT bit is set to 0, so interrupts are active high
     # Justification bit is set to 0, so right-justified with sign extension
     # D1 = 0 and D0 = 1, so range is +/- 4g
-    write_register(cs_pin, REG_DATA_FORMAT, 0x09)  # +/- 4g; 0.004g/LSB
-    # *****
-    # The BW_RATE register is used to set Data rate and power mode control
-
-    # LOW_POWER bit is set to 0, so normal operation
-    # RATE bits are set to 0x06, so 6.25 Hz
-    write_register(cs_pin, REG_BW_RATE, 0x0A)
+    # write_register(cs_pin, REG_DATA_FORMAT, 0x00)  # +/- 4g; 0.004g/LSB
     # *****
     # POWER_CTL Power-saving features control
     # Link Bit is set to 0 the inactivity and activity functions are concurrent.
@@ -86,38 +79,12 @@ def init_adxl345(cs_pin):
 # of sequential registers.
 # Function to read acceleration data
 def read_acceleration(cs_pin):
-    # Initiate burst read from DATAX0 (0x32). Add 0x80 to indicate read operation,
-    # and 0x40 to enable multi-byte read
-    reg_address = 0x32 | 0x80 | 0x40
-    GPIO.output(cs_pin, GPIO.LOW)
-    # Send the address and read 6 bytes of data (X, Y, Z each two bytes)
-    data = spi.xfer2([reg_address] + [0x00]*6)
-    GPIO.output(cs_pin, GPIO.HIGH)
+    x, y, z = unpack("<hhh", read_register(cs_pin, REG_DATA_START, 6))
+    x = x * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
+    y = y * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
+    z = z * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
+    return x, y, z
 
-    # Combine the bytes for each axis
-    x = (data[1] << 8) | data[2]
-    y = (data[3] << 8) | data[4]
-    z = (data[5] << 8) | data[6]
-
-    # Adjust for 10-bit resolution and sign extend if necessary
-    if x & (1 << 9): x -= (1 << 10)
-    if y & (1 << 9): y -= (1 << 10)
-    if z & (1 << 9): z -= (1 << 10)
-
-    # Convert to g values based on the range you configured the ADXL345 for
-    # Assuming the range is +/- 4g (0x01 in the DATA_FORMAT register)
-    scale_factor = 4.0 / 1024
-    x_g = x * scale_factor
-    y_g = y * scale_factor
-    z_g = z * scale_factor
-
-    return x_g, y_g, z_g
-
-# Convert to 2's complement
-def twos_complement(raw_val):
-    if raw_val & (1 << 9):  # If the 10th bit is set, it's negative
-        raw_val -= (1 << 10)  # Subtract 2^10 to extend the sign
-    return raw_val
 # Initialize all ADXL345s
 for pin in cs_pins:
     init_adxl345(pin)
