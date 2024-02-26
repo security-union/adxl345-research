@@ -10,6 +10,18 @@ cd rpi
 deploy_and_run.sh --program serial.py  --install 
 ```
 
+You should see the following output:
+```
+ADXL345 #8: x= 0.000, y=-0.023, z= 0.922
+ADXL345 #22: x= 0.000, y= 0.094, z= 0.000
+ADXL345 #8: x= 0.000, y=-0.023, z= 0.938
+ADXL345 #22: x= 0.000, y= 0.094, z= 0.000
+ADXL345 #8: x= 0.000, y= 0.000, z= 0.938
+ADXL345 #22: x= 0.000, y= 0.000, z= 0.500
+ADXL345 #8: x=-0.016, y=-0.023, z= 0.938
+ADXL345 #22: x= 0.000, y= 0.000, z= 0.531
+```
+
 ## I2C
 
 Connect i2c to raspberry pi following this diagram:

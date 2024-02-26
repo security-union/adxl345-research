@@ -19,7 +19,7 @@ spi.bits_per_word = 8  # 8 bits per word
 
 
 # Setup GPIO for CS pins
-cs_pins = [8]  # GPIO pins for CS of each ADXL345
+cs_pins = [8, 22]  # GPIO pins for CS of each ADXL345
 GPIO.setmode(GPIO.BCM)
 for pin in cs_pins:
     GPIO.setup(pin, GPIO.OUT, initial=GPIO.HIGH)
@@ -121,15 +121,18 @@ for pin in cs_pins:
         exit(1)
 
 try:
-    # print the acceleration data every second
+    # print the acceleration data every second for each ADXL345 sensor
     last_time = time.time()
     while True:
-        for i, pin in enumerate(cs_pins):
-            x, y, z = read_acceleration(pin)
-            if time.time() - last_time > 1:
-                print(f"ADXL345 #{i+1}: x={x}, y={y}, z={z}", flush=True)
-                last_time = time.time()
-            # time.sleep(0.2)
+        if time.time() - last_time > 1:
+            for i, pin in enumerate(cs_pins):
+                x, y, z = read_acceleration(pin)
+                # format number to xx.xxx including sign
+                x = "{:6.3f}".format(x)
+                y = "{:6.3f}".format(y)
+                z = "{:6.3f}".format(z)
+                print(f"ADXL345 #{pin}: x={x}, y={y}, z={z}", flush=True)
+            last_time = time.time()
 except KeyboardInterrupt:
     print("Program stopped")
 finally:
