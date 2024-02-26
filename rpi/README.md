@@ -1,4 +1,21 @@
 ## I2C
+
+Connect i2c to raspberry pi following this diagram:
+![alt text](i2c-wiring.png)
+
+Wire the GND pin of the Accelerometer to Physical Pin 6 (GND) on the Raspberry Pi.
+Wire the VCC pin of the Accelerometer to Physical Pin 1 (3v3) on the Raspberry Pi.
+Wire the SDA pin of the Accelerometer to Physical Pin 3 (SDA) on the Raspberry Pi.
+Wire the SCL pin of the Accelerometer to Physical Pin 5 (SCL) on the Raspberry Pi.
+
+run the following command to install the i2c tools:
+```
+deploy_and_run.sh install
+```
+
+make sure to change the ip address in the deploy_and_run.sh file to the ip address of the raspberry pi.
+
+verify that the i2c device is connected by running the following command in your raspberry pi terminal:
 ```
 sudo i2cdetect -y 1
 ```
