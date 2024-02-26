@@ -2,17 +2,18 @@
 ## Serial
 
 Connect the serial to raspberry pi following this diagram:
-![alt text](Serial.png)
+![alt text](docs/Serial.png)
 
 Run the following command to install the serial tools and start:
 ```
+cd rpi
 deploy_and_run.sh --program serial.py  --install 
 ```
 
 ## I2C
 
 Connect i2c to raspberry pi following this diagram:
-![alt text](i2c-wiring.png)
+![alt text](docs/i2c-wiring.png)
 
 Wire the GND pin of the Accelerometer to Physical Pin 6 (GND) on the Raspberry Pi.
 Wire the VCC pin of the Accelerometer to Physical Pin 1 (3v3) on the Raspberry Pi.
@@ -21,6 +22,7 @@ Wire the SCL pin of the Accelerometer to Physical Pin 5 (SCL) on the Raspberry P
 
 run the following command to install the i2c tools:
 ```
+cd rpi
 deploy_and_run.sh install --program i2c.py --install 
 ```
 
