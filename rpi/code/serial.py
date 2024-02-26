@@ -4,13 +4,15 @@ import time
 from struct import unpack
 
 
-ADXL345_MG2G_MULTIPLIER= 0.004 # < 4mg per lsb
+ADXL345_MG2G_MULTIPLIER = 0.004  # < 4mg per lsb
 SENSORS_GRAVITY_STANDARD = 9.80665
 ACC_CONVERSION = 2 * 16.0 / 8192.0
 
 # Setup SPI
 spi = spidev.SpiDev()
-spi.open(0, 0)  # Using SPI bus 0, device 0 (device is ignored but necessary for opening)
+spi.open(
+    0, 0
+)  # Using SPI bus 0, device 0 (device is ignored but necessary for opening)
 spi.max_speed_hz = 2000000  # 5 MHz
 spi.mode = 3  # ADXL345 operates in mode 3
 spi.bits_per_word = 8  # 8 bits per word
@@ -30,21 +32,26 @@ REG_DATA_START = 0x32
 REG_READ = 0x80
 REG_MULTI_BYTE = 0x40
 
+
 # Write to register
 def write_register(cs_pin, reg_address, data):
     GPIO.output(cs_pin, GPIO.LOW)
     spi.xfer2([reg_address, data])
     GPIO.output(cs_pin, GPIO.HIGH)
 
+
 # Read from register
 # We read 6 bytes of data from the register
-def read_register(cs_pin, reg_address, length = 6):
+def read_register(cs_pin, reg_address, length=6):
     # Set the cs_pin to low to allow communication with the device
     GPIO.output(cs_pin, GPIO.LOW)
-    data = spi.xfer2([reg_address | REG_READ | (REG_MULTI_BYTE if length > 1 else 0)] + [0] * length)[1:]
+    data = spi.xfer2(
+        [reg_address | REG_READ | (REG_MULTI_BYTE if length > 1 else 0)] + [0] * length
+    )[1:]
     # Set the cs_pin to high to disable communication with the device
     GPIO.output(cs_pin, GPIO.HIGH)
     return data
+
 
 # Initialize ADXL345
 def init_adxl345(cs_pin):
@@ -70,6 +77,7 @@ def init_adxl345(cs_pin):
     # WAKEUP bits are set to 0, so 8 Hz
     write_register(cs_pin, REG_POWER_CTL, 0x08)  # Measurement mode
 
+
 # Read acceleration data from ADXL345
 # These six bytes (Register 0x32 to Register 0x37) are eight bits
 # each and hold the output data for each axis. Register 0x32 and
@@ -86,19 +94,20 @@ def init_adxl345(cs_pin):
 def read_acceleration(cs_pin):
     data = read_register(cs_pin, REG_DATA_START, 6)
     # Interpret the data as signed 16-bit values
-    x =  (data[1] << 8) | data[0]
+    x = (data[1] << 8) | data[0]
     if x & (1 << 15):  # Check if x is negative
-        x -= (1 << 16)
-    y =  (data[3] << 8) | data[2]
+        x -= 1 << 16
+    y = (data[3] << 8) | data[2]
     if y & (1 << 15):  # Check if y is negative
-        y -= (1 << 16)
-    z =  (data[5] << 8) | data[4]
+        y -= 1 << 16
+    z = (data[5] << 8) | data[4]
     if z & (1 << 15):  # Check if y is negative
-        z -= (1 << 16)
+        z -= 1 << 16
     x = x * ACC_CONVERSION
     y = y * ACC_CONVERSION
     z = z * ACC_CONVERSION
     return x, y, z
+
 
 # Initialize all ADXL345s
 for pin in cs_pins:
@@ -120,7 +129,7 @@ try:
             if time.time() - last_time > 1:
                 print(f"ADXL345 #{i+1}: x={x}, y={y}, z={z}", flush=True)
                 last_time = time.time()
-            #time.sleep(0.2)
+            # time.sleep(0.2)
 except KeyboardInterrupt:
     print("Program stopped")
 finally:

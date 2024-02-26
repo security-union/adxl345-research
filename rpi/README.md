@@ -9,7 +9,6 @@ Run the following command to install the serial tools and start:
 deploy_and_run.sh --program serial.py  --install 
 ```
 
-
 ## I2C
 
 Connect i2c to raspberry pi following this diagram:
