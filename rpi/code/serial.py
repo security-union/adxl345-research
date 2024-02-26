@@ -130,9 +130,14 @@ for pin in cs_pins:
         exit(1)
 
 try:
+    # print the acceleration data every second
+    last_time = time.time()
     while True:
         for i, pin in enumerate(cs_pins):
             x, y, z = read_acceleration(pin)
+            if time.time() - last_time > 1:
+                print(f"ADXL345 #{i+1}: x={x}, y={y}, z={z}", flush=True)
+                last_time = time.time()
             # x = x * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
             # y = y * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
             # z = z * ADXL345_MG2G_MULTIPLIER * SENSORS_GRAVITY_STANDARD
@@ -140,7 +145,6 @@ try:
             # To convert the 10-bit value to g-forces, 
             # you need to know the scale factor, which depends on the selected g-range. 
             # For a ±4g range, each bit represents 4g / 2^10 (about 0.0039g per bit):
-            print(f"ADXL345 #{i+1}: x={x}, y={y}, z={z}", flush=True)
         #time.sleep(0.2)
 except KeyboardInterrupt:
     print("Program stopped")

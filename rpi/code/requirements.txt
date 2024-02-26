@@ -1,0 +1,5 @@
+adafruit-circuitpython-adxl34x
+spidev
+RPi.GPIO
+rpi.gpio
+smbus

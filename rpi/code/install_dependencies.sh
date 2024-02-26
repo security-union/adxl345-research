@@ -7,7 +7,10 @@ sudo apt-get update
 sudo apt-get install -y python3 python3-pip
 
 # Install system dependencies for GPIO and SPI interface
-sudo apt-get install -y python3-dev python3-rpi.gpio
+sudo apt-get install -y python3-dev i2c-tools
 
-# Use pip to install Python dependencies directly with apt
-sudo apt install -y python3-spidev python3-RPi.GPIO
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -r requirements.txt
+
+

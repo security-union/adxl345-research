@@ -5,12 +5,14 @@ PI_IP="192.168.0.194" # Change this to your Pi's IP address or hostname
 PI_USER="ubuntu" # Change this to your Pi's username
 LOCAL_PROJECT_DIR="./code" # Local project directory to sync
 PI_PROJECT_DIR="/home/ubuntu/accelerometers" # Destination directory on Pi
-MAIN_PY_SCRIPT="main.py" # Python script to run
+MAIN_PY_SCRIPT="activate_env_and_run.sh" # Python script to run
 
-# Check for correct usage
-if [ "$#" -ne 0 ]; then
-    echo "Usage: $0"
-    exit 1
+# Add help message
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+    echo "Usage: $0 [install]"
+    echo "Syncs code to Raspberry Pi, installs dependencies, and runs program."
+    echo "Optional argument 'install' installs dependencies."
+    exit 0
 fi
 
 # Add argument to optionally install dependencies
@@ -38,4 +40,4 @@ fi
 
 # Step 3: Run program and get output
 echo "Running program on Raspberry Pi and fetching output..."
-ssh $PI_USER@$PI_IP "sudo -S python3 $PI_PROJECT_DIR/code/$MAIN_PY_SCRIPT"
+ssh $PI_USER@$PI_IP "cd $PI_PROJECT_DIR/code && ./$MAIN_PY_SCRIPT"
