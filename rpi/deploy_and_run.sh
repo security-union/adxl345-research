@@ -40,4 +40,4 @@ fi
 
 # Step 3: Run program and get output
 echo "Running program on Raspberry Pi and fetching output..."
-ssh $PI_USER@$PI_IP "cd $PI_PROJECT_DIR/code && ./$MAIN_PY_SCRIPT"
+ssh $PI_USER@$PI_IP "cd $PI_PROJECT_DIR/code && sudo -S ./$MAIN_PY_SCRIPT"
