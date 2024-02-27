@@ -5,15 +5,17 @@ Seems like adding a 3rd accelerometer using SPI is not possible, so we will use 
 
 1. Connect the serial to raspberry pi following this diagram:
 
+Use this page to get rpi pinout https://pinout.xyz/pinout/pin23_gpio11/
+
 ```
 [Raspberry Pi]    SPI Interface    [ADXL345 #1 (SPI)]    [ADXL345 #2 (SPI)]    [ADXL345 (I2C)]
 +-------------+                    +----------------+    +----------------+    +--------------+
 |             |                    |                |    |                |    |              |
-|          GPIO 10 (MOSI)----------|SDI-------------|----|SDI             |    |              |
+|          GPIO 10 (MOSI)----------|SDA-------------|----|SDA             |    |              |
 |             |                    |                |    |                |    |              |
 |          GPIO 9 (MISO)-----------|SDO-------------|----|SDO             |    |              |
 |             |                    |                |    |                |    |              |
-|          GPIO 11 (SCLK)----------|SCLK------------|----|SCLK            |    |              |
+|          GPIO 11 (SCLK)----------|SCL-------------|----|SCL             |    |              |
 |             |                    |                |    |                |    |              |
 |          GPIO 17 (CS)------------|CS              |    |                |    |              |
 |             |                    |                |    |                |    |              |
