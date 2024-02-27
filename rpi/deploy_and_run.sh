@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Configuration variables
-PI_IP="192.168.0.194" # Change this to your Pi's IP address or hostname
-PI_USER="ubuntu" # Change this to your Pi's username
+# Read PI_IP and PI_USER from ENV VAR
+source .env
+
 LOCAL_PROJECT_DIR="./code" # Local project directory to sync
 PI_PROJECT_DIR="/home/ubuntu/accelerometers" # Destination directory on Pi
 MAIN_PY_SCRIPT="activate_env_and_run.sh" # Python script to run
