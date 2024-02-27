@@ -2,25 +2,31 @@ import spidev
 import RPi.GPIO as GPIO
 import time
 from struct import unpack
-
+import time
+import board
+import adafruit_adxl34x
 
 ADXL345_MG2G_MULTIPLIER = 0.004  # < 4mg per lsb
 SENSORS_GRAVITY_STANDARD = 9.80665
 ACC_CONVERSION = 2 * 16.0 / 8192.0
+
+# Setup GPIO for CS pins
+cs_pins = [17, 22]  # GPIO pins for CS of each ADXL345
+
 
 # Setup SPI
 spi = spidev.SpiDev()
 spi.open(
     0, 0
 )  # Using SPI bus 0, device 0 (device is ignored but necessary for opening)
-spi.max_speed_hz = 2000000  # 5 MHz
+spi.max_speed_hz = 2000000  # 2 MHz
 spi.mode = 3  # ADXL345 operates in mode 3
 spi.bits_per_word = 8  # 8 bits per word
 
 
-# Setup GPIO for CS pins
-cs_pins = [8, 22]  # GPIO pins for CS of each ADXL345
+# Set up GPIO, BCM means we are referring to the GPIO by the "Broadcom SOC channel" number
 GPIO.setmode(GPIO.BCM)
+# Set up the CS pins as outputs and set them to high
 for pin in cs_pins:
     GPIO.setup(pin, GPIO.OUT, initial=GPIO.HIGH)
 
@@ -112,7 +118,7 @@ def read_acceleration(cs_pin):
 # Initialize all ADXL345s
 for pin in cs_pins:
     init_adxl345(pin)
-    time.sleep(0.1)  # Short delay after initialization
+    time.sleep(1)  # Short delay after initialization
     # verify communication by reading the device ID
     device_id = read_register(pin, 0x00, 1)
     print(f"ADXL345 on CS pin {pin} has device ID: {device_id[0]}", flush=True)
@@ -120,19 +126,29 @@ for pin in cs_pins:
         print(f"ADXL345 on CS pin {pin} is not communicating properly", flush=True)
         exit(1)
 
+# initialize ADXL345 i2c
+# Setup I2C
+i2c = board.I2C()  # uses board.SCL and board.SDA
+accelerometer = adafruit_adxl34x.ADXL345(i2c)
+
 try:
     # print the acceleration data every second for each ADXL345 sensor
-    last_time = time.time()
     while True:
-        if time.time() - last_time > 1:
-            for i, pin in enumerate(cs_pins):
-                x, y, z = read_acceleration(pin)
-                # format number to xx.xxx including sign
-                x = "{:6.3f}".format(x)
-                y = "{:6.3f}".format(y)
-                z = "{:6.3f}".format(z)
-                print(f"ADXL345 #{pin}: x={x}, y={y}, z={z}", flush=True)
-            last_time = time.time()
+        for i, pin in enumerate(cs_pins):
+            time.sleep(0.1)
+            x, y, z = read_acceleration(pin)
+            # format number to xx.xxx including sign
+            x = "{:6.3f}".format(x)
+            y = "{:6.3f}".format(y)
+            z = "{:6.3f}".format(z)
+            print(f"ADXL345 #{pin}: x={x}, y={y}, z={z}", flush=True)
+        # normalize the acceleration data for the i2c sensor to g units
+        x, y, z = accelerometer.acceleration
+        x = "{:6.3f}".format(x/SENSORS_GRAVITY_STANDARD)
+        y = "{:6.3f}".format(y/SENSORS_GRAVITY_STANDARD)
+        z = "{:6.3f}".format(z/SENSORS_GRAVITY_STANDARD)
+        print(f"ADXL345 #i2c: x={x}, y={y}, z={z}", flush=True)
+        time.sleep(0.2)
 except KeyboardInterrupt:
     print("Program stopped")
 finally:

@@ -11,6 +11,6 @@ sudo apt-get install -y python3-dev i2c-tools
 
 python3 -m venv .venv
 source .venv/bin/activate
-pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt --break-system-packages
 
 

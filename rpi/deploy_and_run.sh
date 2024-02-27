@@ -25,7 +25,7 @@ else
 fi
 
 # Add argument to optionally install dependencies
-if [ "$2" == "--install" ]; then
+if [ "$3" == "--install" ]; then
     INSTALL_DEPENDENCIES=true
 else
     INSTALL_DEPENDENCIES=false

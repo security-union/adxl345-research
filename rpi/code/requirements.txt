@@ -4,3 +4,4 @@ RPi.GPIO
 rpi.gpio
 smbus
 black
+Adafruit-Blinka
